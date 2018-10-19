@@ -1,0 +1,2 @@
+# ManagerCouchdb
+ManagerCouchdb
