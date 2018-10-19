@@ -28,7 +28,8 @@ var resCreateDb = await serverManagerCouchdb.createDatabase("databasename")
 ```
 
 ### Database manager
-```var dbInformation = dbManagerCouchdb.getDatabaseInformation()
+```
+var dbInformation = dbManagerCouchdb.getDatabaseInformation()
 
 var resInsertDoc = await dbManagerCouchdb.insertDocument(document)
 
