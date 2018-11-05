@@ -1,5 +1,5 @@
 # ManagerCouchdb
-Manager for CouchdDB servers and databases
+ManagerCouchdb is a javascript library for managing CouchdDB servers and databases.
 
 ## How to install it
 ```
