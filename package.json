@@ -1,0 +1,26 @@
+{
+  "name": "managercouchdb",
+  "version": "1.0.0",
+  "description": "Manager for CouchdDB servers and databases",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SPINEProject/ManagerCouchdb.git"
+  },
+  "keywords": [
+    "couchdb"
+  ],
+  "author": "Alfredo Morales Pinzon",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SPINEProject/ManagerCouchdb/issues"
+  },
+  "homepage": "https://github.com/SPINEProject/ManagerCouchdb#readme",
+  "dependencies": {
+    "nano": "^7.1.0",
+    "request-promise-native": "^1.0.5"
+  }
+}
