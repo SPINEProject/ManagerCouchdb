@@ -1,9 +1,14 @@
 # ManagerCouchdb
-Manager for CouchdDB servers and databases
+ManagerCouchdb is a javascript library for managing CouchdDB servers and databases.
 
 ## How to install it
 ```
 npm install --save github:SPINEProject/ManagerCouchdb
+```
+or 
+
+```
+npm install --save ../../ManagerCouchdb
 ```
 
 ## How to use it
@@ -28,8 +33,7 @@ var resCreateDb = await serverManagerCouchdb.createDatabase("databasename")
 ```
 
 ### Database manager
-```
-var dbInformation = dbManagerCouchdb.getDatabaseInformation()
+```var dbInformation = dbManagerCouchdb.getDatabaseInformation()
 
 var resInsertDoc = await dbManagerCouchdb.insertDocument(document)
 
@@ -42,3 +46,6 @@ var viewResults = dbManagerCouchdb.getView(designName, viewName, keys)
 var viewResultsMultQueries = dbManagerCouchdb.getViewWithMuktipleQueries(designName, viewName, arrayKeys)
 
 ```
+
+
+
