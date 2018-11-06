@@ -5,7 +5,6 @@ ManagerCouchdb is a javascript library for managing CouchdDB servers and databas
 ```
 npm install --save github:SPINEProject/ManagerCouchdb
 ```
-
 or 
 
 ```
@@ -47,4 +46,6 @@ var viewResults = dbManagerCouchdb.getView(designName, viewName, keys)
 var viewResultsMultQueries = dbManagerCouchdb.getViewWithMuktipleQueries(designName, viewName, arrayKeys)
 
 ```
+
+
 
