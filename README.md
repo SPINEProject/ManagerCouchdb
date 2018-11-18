@@ -1,14 +1,9 @@
 # ManagerCouchdb
-ManagerCouchdb is a javascript library for managing CouchdDB servers and databases.
+ManagerCouchdb is a javascript library for managing CouchdDB servers and databases. This library was created and is maintained at the Center for Neurological Imaging (https://cni.bwh.harvard.edu/).
 
 ## How to install it
 ```
-npm install --save github:SPINEProject/ManagerCouchdb
-```
-or 
-
-```
-npm install --save ../../ManagerCouchdb
+npm install --save managercouchdb
 ```
 
 ## How to use it
