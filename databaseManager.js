@@ -54,6 +54,28 @@ module.exports.getDatabaseManager = async (serverUrl, databaseName) => {
   }
 
   /**
+   * Function that deletes a document in the database
+   * @param {string} id is the id of the document to be removed
+   * @param {string} rev is the revision id of the document to be removed
+   * @resolves {Object} confirmation document from couchdb
+   * @rejects {Promise<string>} if an error occurs in the request
+   */
+  dbManagerCouchdb.destroyDocument = async (id, rev) => {
+    return new Promise( (resolve, reject) => {
+
+      dbManagerCouchdb.nanoConnection.destroy(id, rev, function(err, body) {
+        if (!err){
+          resolve(body)
+        }
+        else{
+          reject('Error destroying document. \n\t ERROR:' + err)
+        }
+      });
+
+    })
+  }
+
+  /**
    * Function that inserts documents in a couchdb database in bulk mode
    * @param {object} bulkDocument is an object with the documents to be inserted
    * @resolves {Promise<string>} result of the operation
