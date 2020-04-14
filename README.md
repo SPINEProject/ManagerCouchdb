@@ -16,7 +16,7 @@ const dbManagerCouchdb = await managerCouchdb.getDatabaseManager("localhost:5984
 
 ### Server manager
 ```
-var serverRunnig = serverManagerCouchdb.isServerRunning()
+var serverRunning = await serverManagerCouchdb.isServerRunning()
 
 var serverInformation = serverManagerCouchdb.getServerInformation()
 
