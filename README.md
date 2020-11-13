@@ -32,7 +32,7 @@ var resCreateDb = await serverManagerCouchdb.createDatabase("databasename")
 
 var resInsertDoc = await dbManagerCouchdb.insertDocument(document)
 
-var resDestroyDoc = await dbManagerCouchdb.destroyDocument(document)
+var resDestroyDoc = await dbManagerCouchdb.destroyDocument(documentId, revisionId)
 
 var resInsertDocsBulk = await dbManagerCouchdb.insertDocumentInBulk(documents)
 
