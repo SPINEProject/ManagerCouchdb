@@ -1,12 +1,10 @@
-var rp = require('request-promise-native');
-
 
 module.exports.getServerManager = async (serverUrl) => {
 
   // Variable to be returned
-  var serverManagerCouchdb = {}
+  const serverManagerCouchdb = {};
   
-  let nano = require('nano')(serverUrl)
+  let nano = require('nano')(serverUrl);
 
   /**
    * Function that checks if the server is reachable
@@ -14,15 +12,10 @@ module.exports.getServerManager = async (serverUrl) => {
    * @rejects {Promise<string>} if an error occurs in the request
    */
   serverManagerCouchdb.isServerRunning = async () => {
-    return new Promise( async (resolve, reject) => {
-
-      let options = {
-        uri: serverUrl,
-        method: 'GET'
-      };
+    return new Promise( async (resolve) => {
 
       try {
-        await rp(options)
+        await nano.info();
         resolve(true)
       }
       catch(err){
@@ -30,7 +23,7 @@ module.exports.getServerManager = async (serverUrl) => {
       }
 
     })
-  }
+  };
 
   /**
    * Function that returns the server information
@@ -40,13 +33,8 @@ module.exports.getServerManager = async (serverUrl) => {
   serverManagerCouchdb.getServerInformation = async () => {
     return new Promise( async (resolve, reject) => {
 
-      let options = {
-        uri: serverUrl,
-        method: 'GET'
-      };
-
       try {
-        let serverInformation = await rp(options)
+        let serverInformation = await nano.info();
         resolve(serverInformation)
       }
       catch(err){
@@ -54,28 +42,23 @@ module.exports.getServerManager = async (serverUrl) => {
       }
 
     })
-  }
+  };
 
   /**
    * Function that checks if a database exists in the couchdb server
-   * @param {string} serverUrl is the url of the server
    * @resolves {bool} true if the database exists, false otherwise
    * @rejects {Promise<string>} if the server is not reachable
+   * @param databaseName
    */
   serverManagerCouchdb.databaseExist = async (databaseName) => {
     return new Promise( async (resolve, reject) => {
 
-      let isServerUp = await serverManagerCouchdb.isServerRunning()
+      let isServerUp = await serverManagerCouchdb.isServerRunning();
       if( !isServerUp )
-        reject("The server is not reachable.")
-
-      let options = {
-        uri: serverUrl + '/' + databaseName,
-        method: 'GET'
-      };
+        reject("The server is not reachable.");
 
       try {
-        await rp(options)
+        await nano.db.get(databaseName);
         resolve(true)
       }
       catch(err){
@@ -83,7 +66,7 @@ module.exports.getServerManager = async (serverUrl) => {
       }
 
     })
-  }
+  };
 
   /**
    * Function that creates a database in the couchdb server
@@ -95,20 +78,20 @@ module.exports.getServerManager = async (serverUrl) => {
   serverManagerCouchdb.createDatabase = async (databaseName) => {
     return new Promise( async (resolve, reject) => {
 
-      let isServerUp = await serverManagerCouchdb.isServerRunning()
+      let isServerUp = await serverManagerCouchdb.isServerRunning();
       if( !isServerUp )
-        reject("The server is not reachable.")
+        reject("The server is not reachable.");
 
-      nano.db.create(databaseName, function (err, body) {
+      await nano.db.create(databaseName, function (err, body) {
         if (!err) {
-          resolve(body)
+          resolve(true)
         }
         else
           reject('Error creating database ' + databaseName + '. Error: ' + err)
       });
 
     })
-  }
+  };
 
   /**
    * Function that destroys a database in the couchdb server
@@ -120,11 +103,11 @@ module.exports.getServerManager = async (serverUrl) => {
   serverManagerCouchdb.destroyDatabase = async(databaseName) => {
     return new Promise( async (resolve, reject) => {
 
-      let isServerUp = await serverManagerCouchdb.isServerRunning()
+      let isServerUp = await serverManagerCouchdb.isServerRunning();
       if( !isServerUp )
-        reject("The server is not reachable.")
+        reject("The server is not reachable.");
 
-      nano.db.destroy(databaseName, function(err, body){
+      await nano.db.destroy(databaseName, function(err, body){
         if(!err){
           resolve(true)
         }
@@ -135,8 +118,8 @@ module.exports.getServerManager = async (serverUrl) => {
       });
 
     })
-  }
+  };
 
   return serverManagerCouchdb
 
-}
+};
