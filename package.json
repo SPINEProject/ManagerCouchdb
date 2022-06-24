@@ -1,6 +1,6 @@
 {
   "name": "managercouchdb",
-  "version": "1.1.2",
+  "version": "2.0.0",
   "description": "Manager for CouchdDB servers and databases",
   "main": "index.js",
   "scripts": {
@@ -20,7 +20,6 @@
   },
   "homepage": "https://github.com/SPINEProject/ManagerCouchdb#readme",
   "dependencies": {
-    "nano": "^7.1.0",
-    "request-promise-native": "^1.0.5"
+    "nano": "10.0.0"
   }
 }
