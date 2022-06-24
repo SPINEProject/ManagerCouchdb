@@ -1,17 +1,16 @@
-var rp = require('request-promise-native');
 
 module.exports.getDatabaseManager = async (serverUrl, databaseName) => {
 
   // Variable to be returned
-  var dbManagerCouchdb = {}
+  const dbManagerCouchdb = {};
 
   // Get the nano connection
-  let nano = require('nano')(serverUrl)
+  let nano = require('nano')(serverUrl);
 
-  dbManagerCouchdb.nanoConnection = await nano.db.use(databaseName)
+  dbManagerCouchdb.nanoConnection = await nano.db.use(databaseName);
 
   /**
-   * Function that returns the information from the database
+   * Function that returns the information about the database (NOT SERVER!)
    * @resolves {Object} couchdbInfo object with the information retrieve from
    *             couchdb
    * @rejects {Promise<string>} if an error occurs in the request
@@ -19,18 +18,15 @@ module.exports.getDatabaseManager = async (serverUrl, databaseName) => {
   dbManagerCouchdb.getDatabaseInformation = async ( ) => {
     return new Promise( async (resolve, reject) => {
 
-      let options = { uri: serverUrl, method: 'GET' };
-
       try {
-        let couchdbInfo = await
-        rp(options)
+        let couchdbInfo = await nano.db.get(databaseName);
         resolve(couchdbInfo)
       }
       catch(err){
         reject('Error getting the database information. Error: ' + err)
       }
     })
-  }
+  };
 
   /**
    * Function that inserts a document in the database
@@ -51,29 +47,45 @@ module.exports.getDatabaseManager = async (serverUrl, databaseName) => {
       });
 
     })
-  }
+  };
 
   /**
    * Function that deletes a document in the database
    * @param {string} id is the id of the document to be removed
-   * @param {string} rev is the revision id of the document to be removed
+   * @param {string} rev is the optional revision id of the document to be removed
    * @resolves {Object} confirmation document from couchdb
    * @rejects {Promise<string>} if an error occurs in the request
    */
-  dbManagerCouchdb.destroyDocument = async (id, rev) => {
+  dbManagerCouchdb.destroyDocument = async (id, rev=undefined ) => {
     return new Promise( (resolve, reject) => {
 
-      dbManagerCouchdb.nanoConnection.destroy(id, rev, function(err, body) {
-        if (!err){
-          resolve(body)
-        }
-        else{
-          reject('Error destroying document. \n\t ERROR:' + err)
-        }
-      });
+      if (rev === undefined){
+        dbManagerCouchdb.nanoConnection.get(id, function (err, body) {
+          if (err) {
+            reject (err);
+          }
+          if (!err && body!=null) {
+            dbManagerCouchdb.nanoConnection.destroy(id, body._rev, function (err, body) {
+              if (err) {
+                reject(err)
+              }
+              else resolve(body);
+            });
+          }
+        })
+      }
+      else
+        dbManagerCouchdb.nanoConnection.destroy(id, rev, function(err, body) {
+          if (!err){
+            resolve(body)
+          }
+          else{
+            reject('Error destroying document. \n\t ERROR:' + err)
+          }
+        });
 
     })
-  }
+  };
 
   /**
    * Function that inserts documents in a couchdb database in bulk mode
@@ -85,18 +97,66 @@ module.exports.getDatabaseManager = async (serverUrl, databaseName) => {
     return new Promise( (resolve, reject) => {
 
       dbManagerCouchdb.nanoConnection.bulk(bulkDocument, function(err, body) {
-      if (!err) {
-        resolve(body)
-      }
-      else{
-        reject('Error inserting documents in bulk mode. \nError:' + err)
-      }
+        if (!err) {
+          resolve(body)
+        }
+        else{
+          reject('Error inserting documents in bulk mode. \nError:' + err)
+        }
 
-    });
+      });
 
-  })
-  }
+    })
+  };
 
+  /**
+   * Nano request for fetching multiple documents
+   * Wrapper over nano.fetch
+   * @param {array} documentIds - array of document ids
+   * @resolves {Promise<string>} result of the operation
+   * @rejects {Promise<string>} if an error occurs in the request
+   */
+  dbManagerCouchdb.fetchDocumentsInBulk = async function(documentIds){
+    return new Promise((resolve, reject) => {
+
+      dbManagerCouchdb.nanoConnection.fetch({keys:documentIds}, function (err, body) {
+        if (!err) {
+          resolve(body)
+        }
+        else {
+          if(err.reason === 'missing')
+            resolve(null);
+          else
+            reject(err)
+        }
+      })
+
+    })// Promise
+  };
+
+
+  /**
+   * Function that removes documents in a couchdb database in bulk mode
+   * @resolves {Promise<string>} result of the operation
+   * @rejects {string} Error message
+   * @param bulkDocument - object containing array of docs {docs:[]} to be removed
+   */
+  dbManagerCouchdb.deleteDocumentInBulk = async( bulkDocument) => {
+    return new Promise( (resolve, reject) => {
+
+      const docs = bulkDocument.docs;
+      docs.map(el=>{el['_deleted']=true; return el});
+      dbManagerCouchdb.nanoConnection.bulk(bulkDocument, function(err, body) {
+        if (!err) {
+          resolve(body)
+        }
+        else{
+          console.log('Error inserting documents in bulk mode. Error: ',err);
+          reject(err)
+        }
+      });
+    })
+  };
   /**
    * Function that returns a document in the database given the _id of the
    * document
@@ -114,7 +174,7 @@ module.exports.getDatabaseManager = async (serverUrl, databaseName) => {
         }
         else {
           if(err.reason === 'missing')
-            resolve(null)
+            resolve(null);
           else {
             console.log('Error getting document. ERROR:',err);
             reject(err)
@@ -123,13 +183,13 @@ module.exports.getDatabaseManager = async (serverUrl, databaseName) => {
       })
 
     })
-  }
+  };
 
   /**
    * Function that returns the result of executing a view in couchdb
    * @param {string} designName is the name of the design of the view
    * @param {string} viewName is the name of the view
-   * param {Object} keys is the optional keys send to the the view execution
+   * @param {Object} keys is the optional keys send to the the view execution
    * @resolves {Object} document replied by couchdb after executing the view
    * @rejects {Promise<string>} if there is an error in the request
    */
@@ -146,77 +206,59 @@ module.exports.getDatabaseManager = async (serverUrl, databaseName) => {
       })
 
     })
-  }
+  };
 
   /**
-   * Function that returns the result of executing a view in couchdb using
-   * multiple queries
-   * @param {string} designName is the name of the design of the view
-   * @param {string} viewName is the name of the view
-   * param {array} arrayKeys is an array of objects where each object represents
-   *         the keys for each query
-   * @resolves {Object} document replied by couchdb after executing the view
-   * @rejects {Promise<string>} if there is an error in the request
+   * Nano request for getting ALL designs and views.
+   *
+   * @returns {Promise<void>}
    */
-  dbManagerCouchdb.getViewWithMuktipleQueries  = async (designName, viewName, arrayKeys ) => {
+  dbManagerCouchdb.getDesign  = async ( ) => {
     return new Promise( async (resolve, reject) => {
 
-      // Get the version of the server
-      let options = { uri: serverUrl, method: 'GET' };
+      let params = {
+            startkey:"_design/",
+            endkey:"_design0",
+            include_docs:true
+          };
 
-      var serverInformation = null
       try {
-        serverInformation = await rp(options)
+        let couchdbInfo = await dbManagerCouchdb.nanoConnection.list(params);
+        resolve(couchdbInfo)
       }
       catch(err){
-        reject('Error getting server information. Error: ' + err)
+        reject('Error getting the database information. Error: ' + err)
       }
+    });
+  };
 
-      var serverVersion = serverInformation.version
-      var serverVersionSplit = serverVersion.split(".")
 
+  /**
+   * Nano request for getting view with POST and sending queries for filtering.
+   * @param designName
+   * @param viewName
+   * @param keys -  queries like [{startkey:["key1","key2","key3"], endkey:["key1","key2","key3"]}]
+   * @param includeDocs - optional parameter for getting docs in resultSet
+   * @returns {Promise<void>}
+   */
+  dbManagerCouchdb.getViewWithQuery  = async (designName, viewName, keys, includeDocs=true ) => {
+    return new Promise(async  (resolve, reject) => {
 
-      // If version >= 2.2 the multiple queries are natively implemented
-      if( serverVersionSplit[0] > 2 || (serverVersionSplit[0] = 2 && serverVersionSplit[1]>=2)) {
-
-        let options = {
-          url: serverUrl + '/' + databaseName + "/_design/" + designName +
-          "/_view/" + viewName + '?include_docs=true',
-          method: 'POST',
-          json: keys
-        };
-
-        try {
-          let result = await rp(options)
-          resolve(results)
-        }
-        catch (err) {
-          reject('Error executing view with multiple queries. \nError: ' + err)
-        }
+      let params = {
+       ...keys,
+        include_docs: includeDocs
+      };
+      try {
+        let viewRes = await dbManagerCouchdb.nanoConnection.view(designName, viewName, params);
+        resolve(viewRes);
       }
-      // Else we implemented sending multiple queries and gathering the results
-      else{
-        try {
-          var results = []
-          for (let i in keys.queries) {
-            let key = keys.queries[i]
-            key.include_docs = true
-            let resViewKey = await
-            dbManagerCouchdb.getView(designName, viewName, key)
-            results.push(resViewKey)
-          }
-
-          let res = {
-            results: results
-          }
-          resolve(res)
-        }
-        catch (err) {
-          reject('Error executing view with multiple queries. \nError: ' + err)
-        }
+      catch(err){
+        reject('Error getting the database information. Error: ' + err)
       }
-    })
-  }
+    });
+  };
+
+
 
   return dbManagerCouchdb;
-}
+};
