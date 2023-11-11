@@ -20,6 +20,6 @@
   },
   "homepage": "https://github.com/SPINEProject/ManagerCouchdb#readme",
   "dependencies": {
-    "nano": "10.0.0"
+    "nano": "10.1.2"
   }
 }
