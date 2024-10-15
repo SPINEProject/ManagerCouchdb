@@ -201,7 +201,7 @@ module.exports.getDatabaseManager = async (serverUrl, databaseName) => {
           resolve(body)
         }
         else{
-          reject('ERROR getting view ', designName, '/', viewName, ". \nERROR:", err)
+          reject(`ERROR getting view ${designName}/${viewName}\nERROR:${err}`)
         }
       })
 
