@@ -1,6 +1,6 @@
 {
   "name": "managercouchdb",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Manager for CouchdDB servers and databases",
   "main": "index.js",
   "scripts": {
